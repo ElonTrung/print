@@ -161,7 +161,7 @@
             const fill = (id, value, isHtml = false) => { const el = document.getElementById(id); if (el) { if (isHtml) el.innerHTML = value || ''; else el.textContent = value || ''; } };
             
             fill('company_name', data.company_name);
-            fill('company_address', 'Địa chỉ: ' + (data.company_address || '').replace(/\\n/g, '<br>'), true);
+            fill('company_address', + (data.company_address || '').replace(/\\n/g, '<br>'), true);
             fill('company_phone', 'ĐT: ' + data.company_phone);
             const zaloText = data.company_zalo_display || '';
             const zaloLink = data.company_zalo_link || '#';
