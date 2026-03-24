@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Báo Giá</title>
+    <!-- Tiêu đề mặc định -->
+    <title>Bao_Gia</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -126,7 +127,8 @@
     </style>
 </head>
 <body>
-    <div class="print-button-container"><button class="print-button" onclick="window.print()">In Báo Giá</button></div>
+    <!-- ĐÃ THÊM HÀM printQuote() KHI BẤM IN -->
+    <div class="print-button-container"><button class="print-button" onclick="printQuote()">In Báo Giá</button></div>
     
     <div class="page">
         <!-- Header -->
@@ -179,7 +181,7 @@
             <tbody id="product_table_body"></tbody>
         </table>
 
-        <!-- Ghi chú -->
+        <!-- Khối chứa ghi chú -->
         <div class="notes-block" id="notes_and_terms"></div>
         
         <div class="signatures-section">
@@ -207,6 +209,19 @@
         const BANK_BINS = {'techcombank':'970407','vietcombank':'970436','vpb':'970432','vpbank':'970432','viettinbank':'970415','bidv':'970418','agribank':'970405','acb':'970416','mbbank':'970422','mb':'970422','sacombank':'970403','shb':'970443','hdbank':'970437','tpbank':'970423','vib':'970441','seabank':'970440','ocb':'970448'};
         const BANK_FULL_NAMES = {'techcombank':'Ngân hàng TMCP Kỹ thương Việt Nam (Techcombank)','vietcombank':'Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)','vpb':'Ngân hàng TMCP Việt Nam Thịnh Vượng (VPBank)','vpbank':'Ngân hàng TMCP Việt Nam Thịnh Vượng (VPBank)','viettinbank':'Ngân hàng TMCP Công Thương Việt Nam (VietinBank)','bidv':'Ngân hàng TMCP Đầu tư và Phát triển Việt Nam (BIDV)','agribank':'Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam (Agribank)','acb':'Ngân hàng TMCP Á Châu (ACB)','mbbank':'Ngân hàng TMCP Quân đội (MB)','mb':'Ngân hàng TMCP Quân đội (MB)','sacombank':'Ngân hàng TMCP Sài Gòn Thương Tín (Sacombank)','shb':'Ngân hàng TMCP Sài Gòn - Hà Nội (SHB)','hdbank':'Ngân hàng TMCP Phát triển Thành phố Hồ Chí Minh (HDBank)','tpbank':'Ngân hàng TMCP Tiên Phong (TPBank)','vib':'Ngân hàng TMCP Quốc Tế Việt Nam (VIB)','seabank':'Ngân hàng TMCP Đông Nam Á (SeABank)','ocb':'Ngân hàng TMCP Phương Đông (OCB)'};
 
+        // ĐÂY LÀ HÀM ÉP TRÌNH DUYỆT ĐỔI TÊN FILE KHI BẤM IN
+        function printQuote() {
+            let quoteNum = document.getElementById('quote_number').innerText;
+            if(quoteNum) {
+                // Xóa các ký tự không được phép lưu trong tên file Windows
+                let safeName = String(quoteNum).replace(/[\\/:*?"<>|]/g, "-");
+                document.title = "Báo giá " + safeName;
+            } else {
+                document.title = "Báo giá";
+            }
+            window.print();
+        }
+
         function getDataString() {
             if (window.location.hash) {
                 let h = window.location.hash.substring(1); 
@@ -224,7 +239,7 @@
         function docso(sotien) {
             const chuSo =["không","một","hai","ba","bốn","năm","sáu","bảy","tám","chín"]; const hang =["","nghìn","triệu","tỷ","nghìn tỷ","triệu tỷ"];
             function docNhom(nhom, first) {
-                let t = Math.floor(nhom/100), c = Math.floor((nhom%100)/10), d = nhom%10, kq =[];
+                let t = Math.floor(nhom/100), c = Math.floor((nhom%100)/10), d = nhom%10, kq = [];
                 if (t > 0) kq.push(chuSo[t], "trăm");
                 if (c > 1) { kq.push(chuSo[c], "mươi"); if (d==1) kq.push("mốt"); else if (d>1) kq.push(chuSo[d]); }
                 else if (c == 1) { kq.push("mười"); if (d==5) kq.push("lăm"); else if (d>0) kq.push(chuSo[d]); }
@@ -281,16 +296,11 @@
 
             const data = expandData(raw);
 
-            // --- ĐỔI TÊN FILE PDF KHI IN ---
+            // Đổi tiêu đề mặc định trước
             if (data.quote_number) {
-                // Đổi tiêu đề thẻ Title của trình duyệt
-                // Lọc bỏ ký tự không hợp lệ cho tên file Windows (nếu có)
-                let safeName = data.quote_number.replace(/[\\/:*?"<>|]/g, "-");
+                let safeName = String(data.quote_number).replace(/[\\/:*?"<>|]/g, "-");
                 document.title = "Báo giá " + safeName;
-            } else {
-                document.title = "Bao_gia";
             }
-            // -------------------------------
 
             const fill = (id, v) => { const el = document.getElementById(id); if(el) el.innerHTML = (v||'').replace(/\\n/g, '<br>'); };
             const fmt = (n) => new Intl.NumberFormat('de-DE').format(Math.round(n||0));
@@ -315,7 +325,7 @@
 
             fill('quote_number', data.quote_number); fill('quote_date', data.quote_date);
             fill('customer_name', data.customer_name); fill('customer_address', data.customer_address);
-            fill('contact_line',[data.customer_contact_person, data.customer_phone, data.customer_email].filter(Boolean).join(' | '));
+            fill('contact_line', [data.customer_contact_person, data.customer_phone, data.customer_email].filter(Boolean).join(' | '));
             
             const pjEl = document.getElementById('customer_project_line');
             if(data.customer_project) { fill('customer_project', "Dự án: "+data.customer_project); pjEl.style.display='block'; } else pjEl.style.display='none';
@@ -345,7 +355,7 @@
                 <tr class="summary-row"><td colspan="7" class="amount-words">${amtInWords}</td></tr>
             `);
             
-            // XỬ LÝ LƯU Ý VÀ ĐKTM
+            // XỬ LÝ LƯU Ý VÀ DKTM
             if (data.notes_and_terms) {
                 let notesArr = data.notes_and_terms.split(/\|\|BR\|\||\\n|\n/);
                 let notesHtml = "<strong>Lưu ý: </strong>"; 
