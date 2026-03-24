@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- Tiêu đề mặc định, sẽ được JS đổi ngay khi có data -->
-    <title>BÁO GIÁ VẬT TƯ</title>
+    <title>Báo Giá</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* --- CẤU HÌNH KHỔ GIẤY A4 CHUẨN --- */
+        /* --- CẤU HÌNH KHỔ GIẤY A4 --- */
         @page {
             size: A4;
-            /* Lề: Trên 15mm, Phải 20mm, Dưới 15mm, Trái 20mm */
             margin: 15mm 20mm 15mm 20mm; 
         }
 
@@ -21,26 +19,24 @@
             font-size: 11pt;
         }
 
-        /* Giao diện xem trên web */
         .page {
             width: 210mm;
             min-height: 297mm;
             margin: 10mm auto;
             background: white;
-            padding: 15mm 20mm; /* Padding ảo để xem trên web */
+            padding: 15mm 20mm; 
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
         }
         
-        /* CẤU HÌNH KHI IN */
         @media print { 
             body { background: white; margin: 0; }
             .page { 
                 width: 100%; 
                 margin: 0; 
-                padding: 0; /* Xóa padding vì @page đã có lề */
+                padding: 0; 
                 border: none; 
                 box-shadow: none; 
                 min-height: auto; 
@@ -76,7 +72,7 @@
         }
         .contact-group { margin-top: 0; }
 
-        .logo { width: 360px; height: auto; margin-bottom: 5px; } /* Kích thước logo 360px */
+        .logo { width: 360px; height: auto; margin-bottom: 5px; }
         
         .quote-details-container { display: flex; flex-direction: column; align-items: flex-end; width: 35%; }
         .quote-info-box { margin-top: 0px; text-align: right; line-height: 1.3; font-size: 11pt; }
@@ -183,7 +179,7 @@
             <tbody id="product_table_body"></tbody>
         </table>
 
-        <!-- Khối chứa ghi chú -->
+        <!-- Ghi chú -->
         <div class="notes-block" id="notes_and_terms"></div>
         
         <div class="signatures-section">
@@ -198,7 +194,7 @@
         <div class="bank-info-container">
             <img id="vietqr_code_small" src="" alt="VietQR">
             <div>
-                <h3 style="margin:0 0 5px 0; font-size:11pt;">Thông margin chuyển khoản:</h3>
+                <h3 style="margin:0 0 5px 0; font-size:11pt;">Thông tin chuyển khoản:</h3>
                 <p style="margin:2px 0;">Tên tk: <span id="bank_account_name"></span></p>
                 <p style="margin:2px 0;">Số tk: <span id="bank_account_number"></span>, <span id="bank_name"></span></p>
                 <p style="margin:2px 0;">Nội dung: <span id="payment_reference_text"></span></p>
@@ -228,7 +224,7 @@
         function docso(sotien) {
             const chuSo =["không","một","hai","ba","bốn","năm","sáu","bảy","tám","chín"]; const hang =["","nghìn","triệu","tỷ","nghìn tỷ","triệu tỷ"];
             function docNhom(nhom, first) {
-                let t = Math.floor(nhom/100), c = Math.floor((nhom%100)/10), d = nhom%10, kq = [];
+                let t = Math.floor(nhom/100), c = Math.floor((nhom%100)/10), d = nhom%10, kq =[];
                 if (t > 0) kq.push(chuSo[t], "trăm");
                 if (c > 1) { kq.push(chuSo[c], "mươi"); if (d==1) kq.push("mốt"); else if (d>1) kq.push(chuSo[d]); }
                 else if (c == 1) { kq.push("mười"); if (d==5) kq.push("lăm"); else if (d>0) kq.push(chuSo[d]); }
@@ -285,18 +281,22 @@
 
             const data = expandData(raw);
 
-            // TỰ ĐỘNG ĐỔI TÊN FILE LƯU PDF DỰA VÀO SỐ BÁO GIÁ
+            // --- ĐỔI TÊN FILE PDF KHI IN ---
             if (data.quote_number) {
-                document.title = "Báo giá " + data.quote_number;
+                // Đổi tiêu đề thẻ Title của trình duyệt
+                // Lọc bỏ ký tự không hợp lệ cho tên file Windows (nếu có)
+                let safeName = data.quote_number.replace(/[\\/:*?"<>|]/g, "-");
+                document.title = "Báo giá " + safeName;
             } else {
                 document.title = "Bao_gia";
             }
+            // -------------------------------
 
             const fill = (id, v) => { const el = document.getElementById(id); if(el) el.innerHTML = (v||'').replace(/\\n/g, '<br>'); };
             const fmt = (n) => new Intl.NumberFormat('de-DE').format(Math.round(n||0));
             const dec = (n) => new Intl.NumberFormat('de-DE', {minimumFractionDigits:2}).format(n||0);
 
-            // Địa chỉ: Thay ; thành xuống dòng
+            // Xử lý địa chỉ
             let addr = data.company_address || "";
             let addrLines = addr.split(/;|\\n/);
             let addrHtml = "";
@@ -345,7 +345,7 @@
                 <tr class="summary-row"><td colspan="7" class="amount-words">${amtInWords}</td></tr>
             `);
             
-            // XỬ LÝ LƯU Ý & DKTM CĂN LỀ THỤT VÀO
+            // XỬ LÝ LƯU Ý VÀ ĐKTM
             if (data.notes_and_terms) {
                 let notesArr = data.notes_and_terms.split(/\|\|BR\|\||\\n|\n/);
                 let notesHtml = "<strong>Lưu ý: </strong>"; 
